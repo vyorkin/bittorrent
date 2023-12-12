@@ -5,8 +5,8 @@ use std::env;
 
 fn decode_bencoded_value(encoded_value: &str) -> Result<serde_json::Value, String> {
     if let Some(rest) = encoded_value.strip_prefix('i') {
-        if let Some(end) = rest.find('e') {
-            if let Ok(integer) = encoded_value[1..end + 1].parse::<i32>() {
+        if let Some(value) = rest.strip_suffix('e') {
+            if let Ok(integer) = value.parse::<i64>() {
                 return Ok(serde_json::Value::Number(integer.into()));
             }
         }
