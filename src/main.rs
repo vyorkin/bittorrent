@@ -4,17 +4,17 @@ use std::env;
 // use serde_bencode
 
 fn decode_bencoded_value(encoded_value: &str) -> Result<serde_json::Value, String> {
-    if let Some(rest) = encoded_value.strip_prefix('i') {
-        if let Some(value) = rest.strip_suffix('e') {
-            if let Ok(integer) = value.parse::<i64>() {
-                return Ok(integer.into());
-            }
-        }
-    } else if let Some((len, rest)) = encoded_value.split_once(':') {
-        if let Ok(len) = len.parse::<usize>() {
-            let value = rest[..len].to_string();
-            return Ok(value.into());
-        }
+    if let Some(n) = encoded_value
+        .strip_prefix('i')
+        .and_then(|rest| rest.strip_suffix('e'))
+        .and_then(|s| s.parse::<i64>().ok())
+    {
+        return Ok(n.into());
+    } else if let Some(len) = encoded_value
+        .split_once(':')
+        .and_then(|(len, rest)| len.parse::<usize>().ok().map(|len| rest[..len].to_string()))
+    {
+        return Ok(len.into());
     }
     Err(format!("Unhandled encoded value: {}", encoded_value))
 }
