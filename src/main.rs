@@ -7,13 +7,13 @@ fn decode_bencoded_value(encoded_value: &str) -> Result<serde_json::Value, Strin
     if let Some(rest) = encoded_value.strip_prefix('i') {
         if let Some(value) = rest.strip_suffix('e') {
             if let Ok(integer) = value.parse::<i64>() {
-                return Ok(serde_json::Value::Number(integer.into()));
+                return Ok(integer.into());
             }
         }
     } else if let Some((len, rest)) = encoded_value.split_once(':') {
         if let Ok(len) = len.parse::<usize>() {
             let value = rest[..len].to_string();
-            return Ok(serde_json::Value::String(value));
+            return Ok(value.into());
         }
     }
     Err(format!("Unhandled encoded value: {}", encoded_value))
