@@ -4,7 +4,13 @@ use std::env;
 // use serde_bencode
 
 fn decode_bencoded_value(encoded_value: &str) -> Result<serde_json::Value, String> {
-    if let Some((len, rest)) = encoded_value.split_once(':') {
+    if let Some(rest) = encoded_value.strip_prefix('i') {
+        if let Some(end) = rest.find('e') {
+            if let Ok(integer) = encoded_value[1..end + 1].parse::<i32>() {
+                return Ok(serde_json::Value::Number(integer.into()));
+            }
+        }
+    } else if let Some((len, rest)) = encoded_value.split_once(':') {
         if let Ok(len) = len.parse::<usize>() {
             let value = rest[..len].to_string();
             return Ok(serde_json::Value::String(value));
