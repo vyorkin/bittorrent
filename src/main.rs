@@ -15,6 +15,24 @@ fn decode_bencoded_value(encoded_value: &str) -> (serde_json::Value, &str) {
                 }
             }
         }
+        'd' => {
+            // d3:foo3:bar5:helloi52ee
+            // d2:xxld3:foo3:bar5:helloi52e3:aaa7:fkslwerei-433e3:asdee
+            let mut dict = serde_json::Map::new();
+            while !rest.is_empty() && !rest.starts_with('e') {
+                let (key, remainder) = decode_bencoded_value(rest);
+                let (value, remainder) = decode_bencoded_value(remainder);
+                let key = match key {
+                    serde_json::Value::String(k) => k,
+                    k => {
+                        panic!("dict keys must be strings, not {:?}", k);
+                    }
+                };
+                rest = remainder;
+                dict.insert(key, value);
+            }
+            return (dict.into(), &rest[1..]);
+        }
         'l' => {
             // l<bencoded_elements>e
             // l5:helloi52ee
