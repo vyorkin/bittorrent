@@ -48,6 +48,11 @@ fn main() -> anyhow::Result<()> {
                 serde_bencode::to_bytes(&torrent.info).context("re-encode info section")?;
             let info_hash = Sha1::digest(info_encoded);
             println!("Info Hash: {}", hex::encode(info_hash));
+            println!("Piece Length: {}", torrent.info.piece_length);
+            println!("Piece Hashes:");
+            for hash in torrent.info.pieces.0 {
+                println!("{}", hex::encode(hash));
+            }
         }
     }
     Ok(())
