@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use sha1::{Digest, Sha1};
 
 /// Metainfo files (also known as .torrent files)
 #[derive(Debug, Clone, Deserialize)]
@@ -7,6 +8,12 @@ pub struct Torrent {
     pub announce: String,
     /// Torrent
     pub info: Info,
+}
+
+impl Torrent {
+    pub fn info_hash(&self) -> [u8; 20] {
+        self.info.hash()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -24,6 +31,13 @@ pub struct Info {
     /// Download represents a single file or a set of files.
     #[serde(flatten)]
     pub keys: Keys,
+}
+
+impl Info {
+    pub fn hash(&self) -> [u8; 20] {
+        let encoded = serde_bencode::to_bytes(&self).expect("bencode should be fine");
+        Sha1::digest(encoded).into()
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
