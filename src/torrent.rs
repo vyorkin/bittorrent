@@ -1,5 +1,9 @@
+use std::path::PathBuf;
+
 use serde::{Deserialize, Serialize};
 use sha1::{Digest, Sha1};
+
+use crate::error::BittorrentError;
 
 /// Metainfo files (also known as .torrent files)
 #[derive(Debug, Clone, Deserialize)]
@@ -11,6 +15,11 @@ pub struct Torrent {
 }
 
 impl Torrent {
+    pub fn from_file(path: PathBuf) -> Result<Self, BittorrentError> {
+        let torrent_bytes = std::fs::read(path)?;
+        serde_bencode::from_bytes(&torrent_bytes).map_err(BittorrentError::BencodeError)
+    }
+
     pub fn info_hash(&self) -> [u8; 20] {
         self.info.hash()
     }
